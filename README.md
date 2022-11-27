@@ -1,6 +1,6 @@
 ## Introduction
 
-This project contains code for creating a todo application.
+This project contains backend code for creating a todo application.
 
 ## Installation
 1. Install dependencies - composer install
@@ -8,4 +8,3 @@ This project contains code for creating a todo application.
 3. Setup database
 4. Serve application- php artisan serve
 
-This project was built with the following:
