@@ -19,7 +19,18 @@ class TodoController extends Controller
      */
     public function index()
     {
-        $todos = Todo::all();
+        try {
+            $todos = Todo::all();
+            $todos = $todos->toArray();
+
+            function cmp($a, $b){
+              return strcmp($a["is_completed"], $b["is_completed"]);
+            }
+
+            usort($todos, "App\Http\Controllers\cmp");
+        } catch (\Exception $e) {
+            return $this->respondError('encountered an error, ' . (!config('app.debug') ? 'Unable to create a new todo item' : (' Error: ' . $e->getMessage())));
+        }
 
         return $this->respondWithResource(new JsonResource([
             'todos' => $todos
@@ -44,29 +55,35 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        $v = Validator::make($request->all(), [
-            'title' => 'required',
-            'photo' => 'required',
-        ]);
+        try {
+            $v = Validator::make($request->all(), [
+                'title' => 'required',
+                'photo' => 'required',
+            ]);
 
-        if ($v->fails()) {
-            return $this->respondError(new JsonResource([
-                'message' => $v->errors(),
-                'statusCode' => 422
-            ]));
-        }
-        if($request->file('photo')) {
-            $image = Image::make($request->file('photo'));
-            $imageName = time().'-'.$request->file('photo')->getClientOriginalName();
-            $destinationPathThumbnail = public_path('uploads/');
-            $image->resize(100,100);
-            $image->save($destinationPathThumbnail.$imageName);
-        }
+            if ($v->fails()) {
+                return $this->respondError(new JsonResource([
+                    'message' => $v->errors(),
+                    'statusCode' => 422
+                ]));
+            }
+            if($request->hasFile('photo')) {
+                $image = Image::make($request->file('photo'));
+                $imageName = time().'-'.$request->file('photo')->getClientOriginalName();
+                $destinationPath = public_path('uploads/');
+                $image->resize(60,60);
+                $image->save($destinationPath.$imageName);
+            }else{
+                $imageName = 'todo-image.png';
+            }
 
-        $todo = new Todo();
-        $todo->title = $request->title;
-        $todo->photo = $imageName;
-        $todo->save();
+            $todo = new Todo();
+            $todo->title = $request->title;
+            $todo->photo = $imageName;
+            $todo->save();
+        } catch (\Exception $e) {
+            return $this->respondError('encountered an error, ' . (!config('app.debug') ? 'Unable to create a new todo item' : (' Error: ' . $e->getMessage())));
+        }
 
         return $this->respondWithResource(new JsonResource([
             'todo' => $todo
@@ -106,11 +123,34 @@ class TodoController extends Controller
      */
     public function update(Request $request, Todo $todo)
     {
-        // return $request;
-        $todo->title = $request->title;
-        $todo->photo = $request->photo;
-        $todo->is_completed = $request->is_completed;
-        $todo->update();
+        try {
+            $v = Validator::make($request->all(), [
+                'title' => 'required',
+            ]);
+
+            if ($v->fails()) {
+                return $this->respondError(new JsonResource([
+                    'message' => $v->errors(),
+                    'statusCode' => 422
+                ]));
+            }
+            if($request->hasFile('photo')) {
+                $image = Image::make($request->file('photo'));
+                $imageName = time().'-'.$request->file('photo')->getClientOriginalName();
+                $destinationPath = public_path('uploads/');
+                $image->resize(100,100);
+                $image->save($destinationPath.$imageName);
+            }else{
+                $imageName = $request->photo;
+            }
+            $todo->title = $request->title;
+            $todo->photo = $imageName;
+            $todo->is_completed = $request->is_completed;
+            $todo->update();
+        } catch (\Exception $e) {
+            return $this->respondError('encountered an error, ' . (!config('app.debug') ? 'Unable to create a new todo item' : (' Error: ' . $e->getMessage())));
+        }
+
         return $this->respondWithResource(new JsonResource([
             'todo' => $todo
         ]));
@@ -124,7 +164,11 @@ class TodoController extends Controller
      */
     public function destroy(Todo $todo)
     {
-        $todo->delete();
+        try {
+            $todo->delete();
+        } catch (\Exception $e) {
+            return $this->respondError('encountered an error, ' . (!config('app.debug') ? 'Unable to create a new todo item' : (' Error: ' . $e->getMessage())));
+        }
         return $this->respondSuccess(new JsonResource([
             'message' => "Resources has been deleted"
         ]));

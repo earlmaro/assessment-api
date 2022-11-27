@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('todos', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 40);
-            $table->string('photo', 50);
+            $table->string('title');
+            $table->string('photo')->nullable();
             $table->boolean('is_completed')->default(false);
             $table->timestamps();
         });
