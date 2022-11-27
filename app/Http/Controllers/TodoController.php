@@ -70,7 +70,7 @@ class TodoController extends Controller
                 $image = Image::make($request->file('photo'));
                 $imageName = time().'-'.$request->file('photo')->getClientOriginalName();
                 $destinationPath = public_path('uploads/');
-                $image->resize(60,60);
+                $image->resize(40,40);
                 $image->save($destinationPath.$imageName);
             }else{
                 $imageName = 'todo-image.png';
