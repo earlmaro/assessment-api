@@ -58,7 +58,6 @@ class TodoController extends Controller
         try {
             $v = Validator::make($request->all(), [
                 'title' => 'required',
-                'photo' => 'required',
             ]);
 
             if ($v->fails()) {
