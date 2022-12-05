@@ -19,6 +19,7 @@ class TodoController extends Controller
      */
     public function index()
     {
+        // return 'ff';
         try {
             $todos = Todo::all();
             $todos = $todos->toArray();
@@ -29,7 +30,7 @@ class TodoController extends Controller
 
             usort($todos, "App\Http\Controllers\cmp");
         } catch (\Exception $e) {
-            return $this->respondError('encountered an error, ' . (!config('app.debug') ? 'Unable to create a new todo item' : (' Error: ' . $e->getMessage())));
+            return $this->respondError('encountered an error, ' . (config('app.debug') ? 'Unable to get todo items' : (' Error: ' . $e->getMessage())));
         }
 
         return $this->respondWithResource(new JsonResource([
@@ -147,7 +148,7 @@ class TodoController extends Controller
             $todo->is_completed = $request->is_completed;
             $todo->update();
         } catch (\Exception $e) {
-            return $this->respondError('encountered an error, ' . (!config('app.debug') ? 'Unable to create a new todo item' : (' Error: ' . $e->getMessage())));
+            return $this->respondError('encountered an error, ' . (!config('app.debug') ? 'Unable to update a new todo item' : (' Error: ' . $e->getMessage())));
         }
 
         return $this->respondWithResource(new JsonResource([
